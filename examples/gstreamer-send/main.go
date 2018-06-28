@@ -51,6 +51,8 @@ func main() {
 	localDescriptionStr := peerConnection.LocalDescription.Marshal()
 	fmt.Println(base64.StdEncoding.EncodeToString([]byte(localDescriptionStr)))
 
+	reader.ReadString('\n')
+
 	gst.CreatePipeline(in).Start()
 	select {}
 }

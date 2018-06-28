@@ -162,7 +162,10 @@ func (p *Packet) Marshal() ([]byte, error) {
 		copy(rawPacket[currOffset:], p.ExtensionPayload)
 	}
 
+	p.PayloadOffset = csrcOffset + (len(p.CSRC) * csrcLength)
+
 	rawPacket = append(rawPacket, p.Payload...)
+	p.Raw = rawPacket
 
 	return rawPacket, nil
 }

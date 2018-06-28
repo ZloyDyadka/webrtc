@@ -186,5 +186,11 @@ func (c *Context) DecryptPacket(packet *rtp.Packet) bool {
 
 // EncryptPacket Encrypts a SRTP packet in place
 func (c *Context) EncryptPacket(packet *rtp.Packet) bool {
-	return false
+	c.updateRolloverCount(packet.SequenceNumber)
+
+	stream := cipher.NewCTR(c.block, c.generateCounter(packet.SequenceNumber))
+
+	stream.XORKeyStream(packet.Payload, packet.Payload)
+
+	return true
 }
