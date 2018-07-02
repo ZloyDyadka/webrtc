@@ -37,39 +37,23 @@ func min(a, b int) int {
  */
 func (p *VP8Payloader) Payload(mtu int, payload []byte) [][]byte {
 	maxFragmentSize := mtu - vp8HeaderSize
-	fragmentCount := (len(payload) + maxFragmentSize - 1) / maxFragmentSize
 
 	payloadData := payload
 	payloadDataRemaining := len(payload)
-
-	if fragmentCount <= 0 {
-		return nil
-	}
-
-	print("Frag count ", fragmentCount)
-
-	payloads := make([][]byte, fragmentCount)
-	for i := 0; i < fragmentCount; i++ {
+	payloadDataIndex := 0
+	var payloads [][]byte
+	for payloadDataRemaining > 0 {
 		currentFragmentSize := min(maxFragmentSize, payloadDataRemaining)
 		out := make([]byte, vp8HeaderSize+currentFragmentSize)
-
-		if i == 0 {
-			// Set the S bit for partition start
-			// This is the only *required* bit we need to worry about
-			// for now
-			out[0] = 1 << 5
-		} else {
-			out[0] = 0
+		if payloadDataRemaining == len(payload) {
+			out[0] = 0x10
 		}
 
-		copy(out[vp8HeaderSize:], payloadData[:currentFragmentSize])
+		copy(out[vp8HeaderSize:], payloadData[payloadDataIndex:payloadDataIndex+currentFragmentSize])
+		payloads = append(payloads, out)
 
-		payloads[i] = out
-
-		print("Created frag: ", len(out))
-
-		payloadData = payloadData[currentFragmentSize:]
 		payloadDataRemaining -= currentFragmentSize
+		payloadDataIndex += currentFragmentSize
 	}
 
 	return payloads

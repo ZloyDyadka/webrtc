@@ -123,7 +123,11 @@ func (p *Packet) Marshal() ([]byte, error) {
 	 * +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 	 */
 
-	rawPacket := make([]byte, 12+(len(p.CSRC)*csrcLength)+(4+len(p.ExtensionPayload)))
+	rawPacketLength := 12 + (len(p.CSRC) * csrcLength)
+	if p.Extension {
+		rawPacketLength += 4 + len(p.ExtensionPayload)
+	}
+	rawPacket := make([]byte, rawPacketLength)
 
 	rawPacket[0] |= p.Version << versionShift
 	if p.Padding {
