@@ -14,6 +14,7 @@ type packetizer struct {
 	SSRC uint32
 	Payloader Payloader
 	Sequencer Sequencer
+	Timestamp uint32
 }
 
 func NewPacketizer(mtu int, pt uint8, ssrc uint32, payloader Payloader, sequencer Sequencer) Packetizer {
@@ -23,6 +24,7 @@ func NewPacketizer(mtu int, pt uint8, ssrc uint32, payloader Payloader, sequence
 		ssrc,
 		payloader,
 		sequencer,
+		0,
 	}
 }
 
@@ -38,10 +40,11 @@ func (p *packetizer) Packetize(payload []byte) []*Packet {
 			Marker: i == len(payloads) - 1,
 			PayloadType: p.PayloadType,
 			SequenceNumber: p.Sequencer.NextSequenceNumber(),
-			Timestamp: 1, // Figure out how to do timestamps
+			Timestamp: p.Timestamp, // Figure out how to do timestamps
 			SSRC: p.SSRC,
 			Payload: pp,
 		}
+		p.Timestamp++
 	}
 
 	return packets
