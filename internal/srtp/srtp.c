@@ -19,7 +19,7 @@ srtp_t *srtp_create_session(void *client_write_key, char *profile) {
   policy.ssrc.value = 0;
   policy.next = NULL;
 
-  policy.ssrc.type = ssrc_any_inbound;
+  policy.ssrc.type = ssrc_any_outbound;
   policy.key = client_write_key;
   if (srtp_create(session, &policy) != srtp_err_status_ok) {
     goto error;
@@ -42,6 +42,26 @@ rtp_packet *srtp_decrypt_packet(srtp_t *sess, void *data, int len) {
     fprintf(stderr, "srtp_unprotect failed %d %d \n", status, len);
     goto error;
   }
+  return p;
+
+error:
+  free(p);
+  return NULL;
+}
+
+rtp_packet *srtp_encrypt_packet(srtp_t *sess, void *data, int len) {
+  rtp_packet *p = calloc(1, sizeof(rtp_packet));
+  p->data = malloc(65536);
+  p->len = len;
+
+  memcpy(p->data, data, len);
+
+  srtp_err_status_t status;
+  if ((status = srtp_protect(*sess, p->data, &p->len)) != 0) {
+    fprintf(stderr, "srtp_protect failed %d %d \n", status, len);
+    goto error;
+  }
+
   return p;
 
 error:

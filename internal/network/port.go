@@ -100,6 +100,7 @@ func (p *Port) Send(packet *rtp.Packet) {
 			raw, err := packet.Marshal()
 			if err != nil {
 				fmt.Printf("Failed to marshal packet: %s \n", err.Error())
+				continue
 			}
 			if _, err := p.conn.WriteTo(raw, nil, authed.peer); err != nil {
 				fmt.Printf("Failed to send packet: %s \n", err.Error())

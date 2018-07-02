@@ -226,11 +226,25 @@ func (c *Context) DecryptPacket(packet *rtp.Packet, rawEncryptedPacket []byte) b
 
 // EncryptPacket Encrypts a SRTP packet in place
 func (c *Context) EncryptPacket(packet *rtp.Packet) bool {
-	c.updateRolloverCount(packet.SequenceNumber)
+	fullRaw, err := packet.Marshal()
+	if err != nil {
+		panic(err)
+	}
 
-	stream := cipher.NewCTR(c.block, c.generateCounter(packet.SequenceNumber))
+	rawIn := C.CBytes(fullRaw)
+	rawPacket := C.srtp_encrypt_packet(c.rawSession, rawIn, C.int(len(fullRaw)))
+	if rawPacket == nil {
+		panic("no rawPacket")
+		return false
+	}
 
-	stream.XORKeyStream(packet.Payload, packet.Payload)
+	tmpPacket := &rtp.Packet{}
+	if err := tmpPacket.Unmarshal(C.GoBytes(rawPacket.data, rawPacket.len)); err != nil {
+		panic(err)
+	}
+
+	packet.Payload = make([]byte, len(tmpPacket.Payload))
+	copy(packet.Payload, tmpPacket.Payload)
 
 	return true
 }

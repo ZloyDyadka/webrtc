@@ -14,5 +14,6 @@ typedef struct rtp_packet {
 
 srtp_t *srtp_create_session(void *client_write_key, char *profile);
 rtp_packet *srtp_decrypt_packet(srtp_t *sess, void *data, int len);
+rtp_packet *srtp_encrypt_packet(srtp_t *sess, void *data, int len);
 
 #endif

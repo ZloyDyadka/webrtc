@@ -84,7 +84,7 @@ func (r *RTCPeerConnection) CreateOffer() error {
 func (r *RTCPeerConnection) AddTrack(mediaType TrackType) (buffers chan<- []byte, err error) {
 	trackInput := make(chan []byte, 15)
 	go func() {
-		packetizer := rtp.NewPacketizer(1500, 96, 123, &codecs.VP8Payloader{}, rtp.NewRandomSequencer())
+		packetizer := rtp.NewPacketizer(1500, 96, 2581832418, &codecs.VP8Payloader{}, rtp.NewRandomSequencer())
 		for {
 			if mediaType == VP8 {
 				packets := packetizer.Packetize(<-trackInput)
